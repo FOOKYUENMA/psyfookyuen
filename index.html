@@ -61,6 +61,28 @@
             padding: 10px;
             border-radius: 5px;
         }
+        .text-form input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+            box-sizing: border-box;
+        }
+        .text-form input[type="submit"] {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #ff6600;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .text-form input[type="submit"]:hover {
+            background-color: #ff5500;
+        }
         footer {
             margin-top: 20px;
             padding: 10px;
@@ -83,23 +105,63 @@
     </header>
     <main>
         <div class="text-display" id="textDisplay">
-            <p>欢迎来到塞可乐鸡树洞</p>
-            <p>这里是你可以随意留言的地方</p>
-            <p>尽情分享你的想法吧！</p>
+            <!-- 留言将显示在这里 -->
         </div>
-        <!-- Utterances评论系统 -->
-        <div id="utterances-container"></div>
-        <script src="https://utteranc.es/client.js"
-                repo="fookyuenma/psyfookyuen"
-                issue-term="pathname"
-                theme="github-light"
-                crossorigin="anonymous"
-                async>
-        </script>
+        <div class="text-form">
+            <input type="text" id="userText" maxlength="20" placeholder="输入你的内容 (最多20字)">
+            <input type="submit" value="提交" onclick="addText()">
+        </div>
     </main>
     <footer>
         <p>联系方式: <a href="mailto:962362833@qq.com">962362833@qq.com</a></p>
         <p>© 2024 Psychology Tree Hole</p>
     </footer>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database.js"></script>
+    <script>
+        // Firebase 配置
+        const firebaseConfig = {
+            apiKey: "AIzaSyAmj3vwEKAjb_fj8G4dBHlFRxfUFmeXZcI",
+            authDomain: "psyfookyuen.firebaseapp.com",
+            databaseURL: "https://psyfookyuen-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "psyfookyuen",
+            storageBucket: "psyfookyuen.appspot.com",
+            messagingSenderId: "569638942261",
+            appId: "1:569638942261:web:fdfdf15685295a9f38637c",
+            measurementId: "G-462C1MM5QQ"
+        };
+
+        // 初始化 Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // 监听留言的变化并实时更新
+        db.ref('messages').on('child_added', function(snapshot) {
+            const message = snapshot.val();
+            displayMessage(message);
+        });
+
+        // 添加新留言
+        function addText() {
+            const userText = document.getElementById('userText').value;
+            if (userText) {
+                const newMessageRef = db.ref('messages').push();
+                newMessageRef.set({
+                    text: userText
+                });
+                document.getElementById('userText').value = ''; // 清空输入框
+            }
+        }
+
+        // 显示留言
+        function displayMessage(message) {
+            const displayArea = document.getElementById('textDisplay');
+            const p = document.createElement('p');
+            p.textContent = message.text;
+            displayArea.prepend(p); // 将新留言显示在顶部
+        }
+    </script>
 </body>
 </html>
