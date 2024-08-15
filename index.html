@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>匿名登录示例</title>
+    <title>匿名留言板 | Psychology Tree Hole</title>
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
@@ -19,8 +19,8 @@
             projectId: "psyfookyuen",
             storageBucket: "psyfookyuen.appspot.com",
             messagingSenderId: "569638942261",
-            appId: "1:569638942261:web:d966920c0984b11138637c",
-            measurementId: "G-7V252NYNTW"
+            appId: "1:569638942261:web:fdfdf15685295a9f38637c",
+            measurementId: "G-462C1MM5QQ"
         };
 
         // Initialize Firebase
@@ -35,10 +35,12 @@
                 .then(() => {
                     console.log("用户以匿名身份登录成功");
                     document.getElementById("loginStatus").textContent = "匿名登录成功";
+                    document.getElementById("loginButton").style.display = "none"; // 隐藏登录按钮
+                    document.getElementById("messageForm").style.display = "block"; // 显示留言表单
                 })
                 .catch((error) => {
                     console.error("匿名登录失败", error);
-                    document.getElementById("loginStatus").textContent = "匿名登录失败";
+                    document.getElementById("loginStatus").textContent = "匿名登录失败，请重试。";
                 });
         }
 
@@ -75,6 +77,10 @@
         // Save a new message
         function addMessage() {
             const userText = document.getElementById('userText').value;
+            if (userText.trim() === '') {
+                alert("请输入留言内容");
+                return;
+            }
             const userId = auth.currentUser ? auth.currentUser.uid : 'unknown';
             set(ref(database, 'messages/' + Date.now()), {
                 text: userText,
@@ -90,15 +96,115 @@
             displayMessages();
         };
     </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 0;
+            width: 100%;
+            box-shadow: 0 4px 2px -2px gray;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        #loginButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #loginButton:hover {
+            background-color: #45a049;
+        }
+
+        #loginStatus {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        #messageForm {
+            display: none;
+            margin-top: 20px;
+        }
+
+        #userText {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        #submitButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #submitButton:hover {
+            background-color: #45a049;
+        }
+
+        #messages {
+            width: 80%;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: left;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        #messages p {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+    </style>
 </head>
 <body>
-    <h1>匿名登录示例</h1>
-    <button onclick="anonymousLogin()">以匿名身份登录</button>
+    <header>
+        <h1>匿名留言板 | Psychology Tree Hole</h1>
+    </header>
+    <button id="loginButton" onclick="anonymousLogin()">以匿名身份登录</button>
     <p id="loginStatus">未登录</p>
     
-    <h2>留言板</h2>
-    <input type="text" id="userText" placeholder="输入你的留言">
-    <button onclick="addMessage()">提交</button>
+    <div id="messageForm">
+        <input type="text" id="userText" placeholder="输入你的留言">
+        <button id="submitButton" onclick="addMessage()">提交</button>
+    </div>
 
     <div id="messages"></div>
 </body>
