@@ -3,265 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>邮箱登录 | Psychology Tree Hole</title>
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
-
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAmj3vwEKAjb_fj8G4dBHlFRxfUFmeXZcI",
-            authDomain: "psyfookyuen.firebaseapp.com",
-            databaseURL: "https://psyfookyuen-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "psyfookyuen",
-            storageBucket: "psyfookyuen.appspot.com",
-            messagingSenderId: "569638942261",
-            appId: "1:569638942261:web:fdfdf15685295a9f38637c",
-            measurementId: "G-462C1MM5QQ"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth();
-        const database = getDatabase(app);
-
-        // Sign up new users
-        function signUp() {
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-            
-            createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    console.log("注册成功:", userCredential.user);
-                    document.getElementById("loginStatus").textContent = "注册成功，请登录。";
-                    // Optionally save user data to the database
-                    set(ref(database, 'users/' + userCredential.user.uid), {
-                        email: email,
-                        createdAt: new Date().toISOString()
-                    });
-                })
-                .catch((error) => {
-                    console.error("注册失败:", error);
-                    document.getElementById("loginStatus").textContent = "注册失败：" + error.message;
-                });
-        }
-
-        // Sign in existing users
-        function signIn() {
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-            
-            signInWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    console.log("登录成功:", userCredential.user);
-                    document.getElementById("loginStatus").textContent = "登录成功";
-                    document.getElementById("authForm").style.display = "none"; // 隐藏登录表单
-                    document.getElementById("messageForm").style.display = "block"; // 显示留言表单
-                })
-                .catch((error) => {
-                    console.error("登录失败:", error);
-                    document.getElementById("loginStatus").textContent = "登录失败：" + error.message;
-                });
-        }
-
-        // Sign out users
-        function logOut() {
-            signOut(auth).then(() => {
-                console.log("用户已注销");
-                document.getElementById("loginStatus").textContent = "已注销";
-                document.getElementById("authForm").style.display = "block"; // 显示登录表单
-                document.getElementById("messageForm").style.display = "none"; // 隐藏留言表单
-            }).catch((error) => {
-                console.error("注销失败:", error);
-            });
-        }
-
-        // Monitor auth state
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                console.log("当前登录用户:", user.email);
-                document.getElementById("loginStatus").textContent = "已登录: " + user.email;
-                document.getElementById("authForm").style.display = "none"; // 隐藏登录表单
-                document.getElementById("messageForm").style.display = "block"; // 显示留言表单
-            } else {
-                console.log("用户未登录");
-                document.getElementById("loginStatus").textContent = "未登录";
-            }
-        });
-
-        // Display messages
-        function displayMessages() {
-            const messagesRef = ref(database, 'messages/');
-            onValue(messagesRef, (snapshot) => {
-                const data = snapshot.val();
-                const displayArea = document.getElementById('messages');
-                displayArea.innerHTML = ''; // 清空之前的内容
-                for (let id in data) {
-                    const message = data[id];
-                    const p = document.createElement('p');
-                    p.textContent = message.text;
-                    displayArea.appendChild(p);
-                }
-            });
-        }
-
-        // Add a new message
-        function addMessage() {
-            const userText = document.getElementById('userText').value;
-            if (userText.trim() === '') {
-                alert("请输入留言内容");
-                return;
-            }
-            const userId = auth.currentUser ? auth.currentUser.uid : 'unknown';
-            set(ref(database, 'messages/' + Date.now()), {
-                text: userText,
-                userId: userId,
-                timestamp: new Date().toISOString()
-            });
-            document.getElementById('userText').value = ''; // 清空输入框
-            displayMessages();
-        }
-
-        // Display messages on page load
-        window.onload = () => {
-            displayMessages();
-        };
-    </script>
+    <title>塞可乐鸡树洞 | Psychology Tree Hole</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
             margin: 0;
             padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
+            color: #fff;
             text-align: center;
+            background-image: url('https://www.publicdomainpictures.net/pictures/320000/velka/night-sky-1573290426FSl.jpg');
+            background-size: cover;
+            background-position: center;
         }
-
         header {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 0;
-            width: 100%;
-            box-shadow: 0 4px 2px -2px gray;
+            padding: 20px 10px;
         }
-
-        h1 {
+        header h1 {
             margin: 0;
-            font-size: 24px;
+            font-size: 32px;
+            font-weight: bold;
+            color: #fff;
         }
-
-        #authForm {
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            max-width: 400px;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        header h2 {
+            margin: 0;
+            font-size: 20px;
+            color: #ddd;
         }
-
-        input[type="email"],
-        input[type="password"] {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 10px 0;
-            width: 100%;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        #loginStatus {
-            margin-top: 10px;
-            font-size: 16px;
-            color: #333;
-        }
-
-        #messageForm {
-            display: none;
-            margin-top: 20px;
-            width: 100%;
-            max-width: 400px;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        #userText {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        #messages {
-            width: 100%;
+        main {
             max-width: 600px;
             margin: 20px auto;
             padding: 10px;
-            background-color: white;
+            background-color: rgba(0, 0, 0, 0.7);
             border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            text-align: left;
-            max-height: 300px;
-            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            overflow: hidden;
+            min-height: 60vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
         }
-
-        #messages p {
-            margin: 10px 0;
+        .text-display {
+            font-size: 20px;
             padding: 10px;
-            background-color: #f9f9f9;
+            flex: 1;
+            overflow-y: auto;
+            color: #fff;
+        }
+        .text-display p {
+            margin: 0;
+            padding: 5px 0;
+            text-align: left;
+        }
+        .text-form {
+            display: flex;
+            margin-top: 10px;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 10px;
             border-radius: 5px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        footer {
+            margin-top: 20px;
+            padding: 10px;
+            color: #bbb;
+            font-size: 14px;
+        }
+        footer a {
+            color: #ff6600;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>邮箱登录 | Psychology Tree Hole</h1>
+        <h1>塞可乐鸡树洞</h1>
+        <h2>Psychology Tree Hole</h2>
     </header>
-
-    <div id="authForm">
-        <input type="email" id="email" placeholder="输入你的邮箱">
-        <input type="password" id="password" placeholder="输入密码">
-        <button onclick="signIn()">登录</button>
-        <button onclick="signUp()">注册</button>
-        <p id="loginStatus">未登录</p>
-    </div>
-
-    <div id="messageForm">
-        <input type="text" id="userText" placeholder="输入你的留言">
-        <button onclick="addMessage()">提交</button>
-        <button onclick="logOut()">注销</button>
-    </div>
-
-    <div id="messages"></div>
+    <main>
+        <div class="text-display" id="textDisplay">
+            <p>欢迎来到塞可乐鸡树洞</p>
+            <p>这里是你可以随意留言的地方</p>
+            <p>尽情分享你的想法吧！</p>
+        </div>
+        <!-- Utterances评论系统 -->
+        <div id="utterances-container"></div>
+        <script src="https://utteranc.es/client.js"
+                repo="fookyuenma/psyfookyuen"
+                issue-term="pathname"
+                theme="github-light"
+                crossorigin="anonymous"
+                async>
+        </script>
+    </main>
+    <footer>
+        <p>联系方式: <a href="mailto:962362833@qq.com">962362833@qq.com</a></p>
+        <p>© 2024 Psychology Tree Hole</p>
+    </footer>
 </body>
 </html>
