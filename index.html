@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>匿名留言板 | Psychology Tree Hole</title>
+    <title>邮箱登录 | Psychology Tree Hole</title>
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-analytics.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
         // Your web app's Firebase configuration
@@ -25,46 +24,80 @@
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
         const auth = getAuth();
         const database = getDatabase(app);
 
-        // Anonymous login function
-        function anonymousLogin() {
-            signInAnonymously(auth)
-                .then(() => {
-                    console.log("用户以匿名身份登录成功");
-                    document.getElementById("loginStatus").textContent = "匿名登录成功";
-                    document.getElementById("loginButton").style.display = "none"; // 隐藏登录按钮
-                    document.getElementById("messageForm").style.display = "block"; // 显示留言表单
+        // Sign up new users
+        function signUp() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    console.log("注册成功:", userCredential.user);
+                    document.getElementById("loginStatus").textContent = "注册成功，请登录。";
+                    // Optionally save user data to the database
+                    set(ref(database, 'users/' + userCredential.user.uid), {
+                        email: email,
+                        createdAt: new Date().toISOString()
+                    });
                 })
                 .catch((error) => {
-                    console.error("匿名登录失败", error);
-                    document.getElementById("loginStatus").textContent = "匿名登录失败，请重试。";
+                    console.error("注册失败:", error);
+                    document.getElementById("loginStatus").textContent = "注册失败：" + error.message;
                 });
         }
 
-        // Monitor authentication state
+        // Sign in existing users
+        function signIn() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    console.log("登录成功:", userCredential.user);
+                    document.getElementById("loginStatus").textContent = "登录成功";
+                    document.getElementById("authForm").style.display = "none"; // 隐藏登录表单
+                    document.getElementById("messageForm").style.display = "block"; // 显示留言表单
+                })
+                .catch((error) => {
+                    console.error("登录失败:", error);
+                    document.getElementById("loginStatus").textContent = "登录失败：" + error.message;
+                });
+        }
+
+        // Sign out users
+        function logOut() {
+            signOut(auth).then(() => {
+                console.log("用户已注销");
+                document.getElementById("loginStatus").textContent = "已注销";
+                document.getElementById("authForm").style.display = "block"; // 显示登录表单
+                document.getElementById("messageForm").style.display = "none"; // 隐藏留言表单
+            }).catch((error) => {
+                console.error("注销失败:", error);
+            });
+        }
+
+        // Monitor auth state
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                console.log("当前登录用户ID:", user.uid);
-                // Store user data in Firebase Realtime Database
-                set(ref(database, 'users/' + user.uid), {
-                    anonymous: true,
-                    createdAt: new Date().toISOString()
-                });
+                console.log("当前登录用户:", user.email);
+                document.getElementById("loginStatus").textContent = "已登录: " + user.email;
+                document.getElementById("authForm").style.display = "none"; // 隐藏登录表单
+                document.getElementById("messageForm").style.display = "block"; // 显示留言表单
             } else {
                 console.log("用户未登录");
+                document.getElementById("loginStatus").textContent = "未登录";
             }
         });
 
-        // Retrieve and display data
+        // Display messages
         function displayMessages() {
             const messagesRef = ref(database, 'messages/');
             onValue(messagesRef, (snapshot) => {
                 const data = snapshot.val();
                 const displayArea = document.getElementById('messages');
-                displayArea.innerHTML = ''; // Clear previous content
+                displayArea.innerHTML = ''; // 清空之前的内容
                 for (let id in data) {
                     const message = data[id];
                     const p = document.createElement('p');
@@ -74,7 +107,7 @@
             });
         }
 
-        // Save a new message
+        // Add a new message
         function addMessage() {
             const userText = document.getElementById('userText').value;
             if (userText.trim() === '') {
@@ -87,7 +120,7 @@
                 userId: userId,
                 timestamp: new Date().toISOString()
             });
-            document.getElementById('userText').value = ''; // Clear input field
+            document.getElementById('userText').value = ''; // 清空输入框
             displayMessages();
         }
 
@@ -123,8 +156,25 @@
             font-size: 24px;
         }
 
-        #loginButton {
+        #authForm {
             margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 80%;
+            max-width: 300px;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
             padding: 10px 20px;
             font-size: 16px;
             background-color: #4CAF50;
@@ -132,9 +182,10 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            margin: 10px;
         }
 
-        #loginButton:hover {
+        button:hover {
             background-color: #45a049;
         }
 
@@ -156,20 +207,6 @@
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 16px;
-        }
-
-        #submitButton {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        #submitButton:hover {
-            background-color: #45a049;
         }
 
         #messages {
@@ -196,14 +233,21 @@
 </head>
 <body>
     <header>
-        <h1>匿名留言板 | Psychology Tree Hole</h1>
+        <h1>邮箱登录 | Psychology Tree Hole</h1>
     </header>
-    <button id="loginButton" onclick="anonymousLogin()">以匿名身份登录</button>
-    <p id="loginStatus">未登录</p>
-    
+
+    <div id="authForm">
+        <input type="email" id="email" placeholder="输入你的邮箱">
+        <input type="password" id="password" placeholder="输入密码">
+        <button onclick="signIn()">登录</button>
+        <button onclick="signUp()">注册</button>
+        <p id="loginStatus">未登录</p>
+    </div>
+
     <div id="messageForm">
         <input type="text" id="userText" placeholder="输入你的留言">
-        <button id="submitButton" onclick="addMessage()">提交</button>
+        <button onclick="addMessage()">提交</button>
+        <button onclick="logOut()">注销</button>
     </div>
 
     <div id="messages"></div>
