@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>塞可乐鸡树洞 | Psychology Tree Hole</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            text-align: center;
+        }
+        header {
+            background-color: #ffcc00;
+            padding: 30px 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        header img {
+            width: 120px;
+            border-radius: 50%;
+        }
+        header h1 {
+            margin: 15px 0 10px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #444;
+        }
+        header h2 {
+            margin: 0;
+            font-size: 20px;
+            color: #666;
+        }
+        main {
+            margin: 40px auto;
+            max-width: 600px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .text-display {
+            margin-bottom: 25px;
+            font-size: 20px;
+            color: #555;
+            padding: 20px;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            background-color: #fafafa;
+        }
+        .text-form {
+            margin-top: 20px;
+        }
+        .text-form input[type="text"] {
+            width: 70%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .text-form input[type="submit"] {
+            padding: 12px 25px;
+            margin-left: 10px;
+            font-size: 16px;
+            background-color: #ff6600;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .text-form input[type="submit"]:hover {
+            background-color: #ff5500;
+        }
+        footer {
+            margin-top: 60px;
+            padding: 25px;
+            background-color: #f5f5f5;
+            color: #777;
+            font-size: 14px;
+        }
+        footer a {
+            color: #ff6600;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="your-avatar-path.jpg" alt="Avatar">
+        <h1>塞可乐鸡树洞</h1>
+        <h2>Psychology Tree Hole</h2>
+    </header>
+    <main>
+        <div class="text-display" id="randomTextDisplay">
+            <!-- Random text will be displayed here -->
+        </div>
+        <div class="text-form">
+            <input type="text" id="userText" maxlength="20" placeholder="输入你的内容 (最多20字)">
+            <input type="submit" value="提交" onclick="addText()">
+        </div>
+    </main>
+    <footer>
+        <p>联系方式: <a href="mailto:962362833@qq.com">962362833@qq.com</a></p>
+        <p>© 2024 Psychology Tree Hole</p>
+    </footer>
+
+    <script>
+        const texts = []; // Array to store user-added texts
+
+        function addText() {
+            const userText = document.getElementById('userText').value;
+            if (userText) {
+                texts.push(userText);
+                document.getElementById('userText').value = ''; // Clear input field
+                displayRandomText();
+            }
+        }
+
+        function displayRandomText() {
+            if (texts.length > 0) {
+                const randomIndex = Math.floor(Math.random() * texts.length);
+                document.getElementById('randomTextDisplay').innerText = texts[randomIndex];
+            }
+        }
+
+        // Initial display of random text
+        displayRandomText();
+    </script>
+</body>
+</html>
