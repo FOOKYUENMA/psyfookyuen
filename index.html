@@ -120,12 +120,12 @@
     <script>
         const repoName = 'psyfookyuen';
         const ownerName = 'fookyuenma';
-        const token = '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';
+        const token = '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';
 
         async function addIssue() {
             const userText = document.getElementById('userText').value;
             if (userText) {
-                const response = await fetch(`https://api.github.com/repos/fookyuenma/psyfookyuen/issues`, {
+                const response = await fetch(`https://api.github.com/repos/${ownerName}/${repoName}/issues`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `token ${token}`,
@@ -153,9 +153,9 @@
         }
 
         async function fetchIssues() {
-            const response = await fetch(`https://api.github.com/repos/fookyuenma/psyfookyuen/issues`, {
+            const response = await fetch(`https://api.github.com/repos/${ownerName}/${repoName}/issues`, {
                 headers: {
-                    'Authorization': `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`,
+                    'Authorization': `token ${token}`,
                     'Accept': 'application/vnd.github.v3+json'
                 }
             });
