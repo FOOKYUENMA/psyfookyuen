@@ -5,3 +5,5 @@
     - server.js
   - .gitignore
   - package.json
+npm install
+npm start
