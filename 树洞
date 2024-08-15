@@ -1,6 +1,3 @@
-# Create a customized version of the HTML file according to the user's specifications
-
-custom_html_content = """
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -137,11 +134,3 @@ custom_html_content = """
     </script>
 </body>
 </html>
-"""
-
-# Save the custom HTML content to a file
-custom_file_path = "/mnt/data/index_custom.html"
-with open(custom_file_path, "w", encoding="utf-8") as file:
-    file.write(custom_html_content)
-
-custom_file_path
