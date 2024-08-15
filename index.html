@@ -1,98 +1,86 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>塞可乐鸡树洞 | Psychology Tree Hole</title>
-    <script src="https://res.wx.qq.com/connect/zh_CN/htmledition/js/wxLogin.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-</head>
-<body>
-    <header>
-        <h1>塞可乐鸡树洞</h1>
-        <h2>Psychology Tree Hole</h2>
-    </header>
-    <main>
-        <div id="login_container"></div>
-        <script type="text/javascript">
-            var obj = new WxLogin({
-                self_redirect: true,
-                id: "login_container",
-                appid: "wx49015d02a87112cb",
-                scope: "snsapi_login",
-                redirect_uri: encodeURIComponent("https://psyfookyuen.com/callback"),
-                state: "random_state",
-                style: "",
-                href: ""
-            });
-        </script>
-        <div id="content">
-            <!-- 登录成功后显示留言功能 -->
-            <div class="text-display" id="textDisplay"></div>
-            <div class="text-form">
-                <input type="text" id="userText" maxlength="100" placeholder="输入你的内容 (最多100字)">
-                <input type="submit" value="提交" onclick="addMessage()">
-            </div>
-        </div>
-    </main>
-    <footer>
-        <p>联系方式: <a href="mailto:962362833@qq.com">962362833@qq.com</a></p>
-        <p>© 2024 Psychology Tree Hole</p>
-    </footer>
-    <script>
-        const firebaseConfig = {
-            apiKey: "YOUR_FIREBASE_API_KEY",
-            authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
-            databaseURL: "YOUR_FIREBASE_DATABASE_URL",
-            projectId: "YOUR_FIREBASE_PROJECT_ID",
-            storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_FIREBASE_MESSAGING_SENDER_ID",
-            appId: "YOUR_FIREBASE_APP_ID"
-        };
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-analytics.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
-        // 初始化 Firebase
-        firebase.initializeApp(firebaseConfig);
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyAmj3vwEKAjb_fj8G4dBHlFRxfUFmeXZcI",
+    authDomain: "psyfookyuen.firebaseapp.com",
+    databaseURL: "https://psyfookyuen-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "psyfookyuen",
+    storageBucket: "psyfookyuen.appspot.com",
+    messagingSenderId: "569638942261",
+    appId: "1:569638942261:web:d966920c0984b11138637c",
+    measurementId: "G-7V252NYNTW"
+  };
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('token');
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth = getAuth();
+  const database = getDatabase(app);
 
-        if (token) {
-            firebase.auth().signInWithCustomToken(token)
-                .then((userCredential) => {
-                    console.log('用户已登录:', userCredential.user);
-                    // 登录成功后显示留言
-                    fetchMessages();
-                })
-                .catch((error) => {
-                    console.error('登录过程中出错:', error);
-                });
-        }
+  // Anonymous login function
+  function anonymousLogin() {
+    signInAnonymously(auth)
+      .then(() => {
+        console.log("用户以匿名身份登录成功");
+        document.getElementById("loginStatus").textContent = "匿名登录成功";
+      })
+      .catch((error) => {
+        console.error("匿名登录失败", error);
+        document.getElementById("loginStatus").textContent = "匿名登录失败";
+      });
+  }
 
-        function addMessage() {
-            const userText = document.getElementById('userText').value;
-            if (userText) {
-                const messageRef = firebase.database().ref('messages').push();
-                messageRef.set({
-                    text: userText
-                });
-                document.getElementById('userText').value = ''; // 清空输入框
-                fetchMessages(); // 重新加载留言
-            }
-        }
+  // Monitor authentication state
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      console.log("当前登录用户ID:", user.uid);
+      // You can store user data in Firebase Realtime Database
+      set(ref(database, 'users/' + user.uid), {
+        anonymous: true,
+        createdAt: new Date().toISOString()
+      });
+    } else {
+      console.log("用户未登录");
+    }
+  });
 
-        function fetchMessages() {
-            const displayArea = document.getElementById('textDisplay');
-            displayArea.innerHTML = ''; // 清空显示区域
+  // Retrieve and display data
+  function displayMessages() {
+    const messagesRef = ref(database, 'messages/');
+    onValue(messagesRef, (snapshot) => {
+      const data = snapshot.val();
+      const displayArea = document.getElementById('messages');
+      displayArea.innerHTML = ''; // Clear previous content
+      for (let id in data) {
+        const message = data[id];
+        const p = document.createElement('p');
+        p.textContent = message.text;
+        displayArea.appendChild(p);
+      }
+    });
+  }
 
-            firebase.database().ref('messages').on('child_added', (snapshot) => {
-                const message = snapshot.val();
-                const p = document.createElement('p');
-                p.textContent = message.text;
-                displayArea.prepend(p);
-            });
-        }
-    </script>
-</body>
-</html>
+  // Save a new message
+  function addMessage() {
+    const userText = document.getElementById('userText').value;
+    const userId = auth.currentUser ? auth.currentUser.uid : 'unknown';
+    set(ref(database, 'messages/' + Date.now()), {
+      text: userText,
+      userId: userId,
+      timestamp: new Date().toISOString()
+    });
+    document.getElementById('userText').value = ''; // Clear input field
+    displayMessages();
+  }
+
+  // Display messages on page load
+  window.onload = () => {
+    displayMessages();
+  };
+</script>
